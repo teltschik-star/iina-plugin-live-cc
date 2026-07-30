@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+        padding: 4px 2px;
+      }
+      .pref-section {
+        margin-bottom: 14px;
+      }
+      .pref-section > label {
+        display: block;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 3px;
+      }
+      .row label {
+        min-width: 150px;
+      }
+      input[type="text"] {
+        width: 100%;
+      }
+      input[type="number"] {
+        width: 70px;
+      }
+      hr {
+        border: none;
+        border-top: 1px solid rgba(128, 128, 128, 0.3);
+        margin: 16px 0;
+      }
+      h4 {
+        margin: 0 0 6px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h4>Speech recognition</h4>
+
+    <div class="pref-section">
+      Model
+      <select id="model-select" style="width: 100%; margin-top: 2px"></select>
+      <!--
+        IINA's own data-pref-key binding populates these; the plugin API's
+        preferences.get() callback never fires in IINA 1.4.4, so reading the
+        values out of bound inputs is the only reliable channel. Kept off-screen
+        rather than display:none so the binding still applies to them.
+      -->
+      <input
+        type="text"
+        id="models-src"
+        data-pref-key="installed_models"
+        style="position: absolute; left: -9999px"
+        tabindex="-1"
+        aria-hidden="true"
+      />
+      <input
+        type="text"
+        id="model-path-src"
+        data-pref-key="model_path"
+        style="position: absolute; left: -9999px"
+        tabindex="-1"
+        aria-hidden="true"
+      />
+      <p class="small secondary pref-help" id="model-help">
+        Downloaded models. Add more with Plugins → Live CC Generator → Download Speech
+        Model, or point at one you already have with Choose Model File…
+      </p>
+    </div>
+
+    <div class="pref-section">
+      Path to <code>whisper-cli</code>
+      <input type="text" data-pref-key="whisper_path" placeholder="(auto-detect)" />
+      <p class="small secondary pref-help">
+        Leave empty to auto-detect. Install with <code>brew install whisper-cpp</code>.
+        <code>ffmpeg</code> is also required (<code>brew install ffmpeg</code>).
+      </p>
+    </div>
+
+    <div class="pref-section">
+      <div class="row">
+        <label>Language</label>
+        <input type="text" data-pref-key="language" placeholder="auto" style="width: 90px" />
+      </div>
+      <p class="small secondary pref-help">
+        An ISO code such as <code>en</code>, <code>de</code>, <code>ja</code>, or
+        <code>auto</code> to detect it. English-only models (<code>.en</code>) ignore this.
+      </p>
+    </div>
+
+    <div class="pref-section">
+      <label>
+        <input type="checkbox" data-type="bool" data-pref-key="translate" />
+        Translate to English
+      </label>
+      <p class="small secondary pref-help">
+        Requires a multilingual model, not an <code>.en</code> one. Note that
+        <code>large-v3-turbo</code> cannot translate either &mdash; it silently
+        transcribes in the source language instead. Use Small or Medium.
+      </p>
+    </div>
+
+    <div class="pref-section">
+      <label>
+        <input type="checkbox" data-type="bool" data-pref-key="vad" />
+        Skip non-speech audio (voice activity detection)
+      </label>
+      <div class="row">
+        <label>VAD threshold</label>
+        <input type="number" data-type="float" data-pref-key="vad_threshold"
+               min="0.05" max="0.95" step="0.05" />
+      </div>
+      <p class="small secondary pref-help">
+        Removes silence and music before transcription, which is where invented
+        text comes from. Needs the voice activity model &mdash; fetch it from
+        Plugins &rarr; Live CC Generator. <strong>Trade-off:</strong> it can also
+        discard quiet speech, and the threshold does not behave predictably &mdash;
+        on one test passage 0.5 and 0.2 returned nothing while 0.3 transcribed
+        correctly. Leave off unless hallucinations bother you, and re-check the
+        result after changing it.
+      </p>
+    </div>
+
+    <hr />
+    <h4>Transcription pacing</h4>
+
+    <div class="pref-section">
+      <div class="row">
+        <label>Chunk length (s)</label>
+        <input type="number" data-type="int" data-pref-key="chunk_seconds" min="10" max="300" />
+      </div>
+      <div class="row">
+        <label>Chunk overlap (s)</label>
+        <input type="number" data-type="int" data-pref-key="chunk_tail_seconds" min="0" max="15" />
+      </div>
+      <div class="row">
+        <label>Chunks ahead</label>
+        <input type="number" data-type="int" data-pref-key="lookahead_chunks" min="0" max="20" />
+      </div>
+      <div class="row">
+        <label>CPU threads</label>
+        <input type="number" data-type="int" data-pref-key="threads" min="0" max="64" />
+      </div>
+      <p class="small secondary pref-help">
+        Shorter chunks reach the screen sooner; longer chunks give the model more context
+        and read better. "Chunks ahead" is how far past the playhead to stay buffered.
+        Threads 0 lets whisper.cpp decide.
+      </p>
+    </div>
+
+    <hr />
+    <h4>Caption display</h4>
+
+    <div class="pref-section">
+      <div class="row">
+        <label>Font size (px)</label>
+        <input type="number" data-type="int" data-pref-key="font_size" min="10" max="96" />
+      </div>
+      <div class="row">
+        <label>Max line length</label>
+        <input type="number" data-type="int" data-pref-key="max_line_length" min="0" max="200" />
+      </div>
+      <div class="row">
+        <label>Position</label>
+        <label><input type="radio" name="position" value="bottom" /> Bottom</label>
+        <label><input type="radio" name="position" value="top" /> Top</label>
+      </div>
+    </div>
+
+    <div class="pref-section">
+      <label>
+        <input type="checkbox" data-type="bool" data-pref-key="show_status" />
+        Show a transcription progress badge
+      </label>
+    </div>
+
+    <div class="pref-section">
+      <label>
+        <input type="checkbox" data-type="bool" data-pref-key="auto_start" />
+        Start captions automatically when a file opens
+      </label>
+    </div>
+
+    <script>
+      // The model list is discovered by the plugin script and published through
+      // the "installed_models" preference, because this page is a webview with no
+      // filesystem access of its own.
+      //
+      // Reading it back is the awkward part: in IINA 1.4.4 the callback passed to
+      // window.iina.preferences.get() is never invoked, and the call returns
+      // undefined, so that API cannot be used to read anything here. IINA's own
+      // data-pref-key binding does work, so the values are read out of two
+      // off-screen inputs it populates for us. Writing via preferences.set() is
+      // fine - it needs no callback.
+      (function () {
+        var select = document.getElementById("model-select");
+        var help = document.getElementById("model-help");
+        var modelsSrc = document.getElementById("models-src");
+        var pathSrc = document.getElementById("model-path-src");
+
+        function basename(p) {
+          var i = String(p).lastIndexOf("/");
+          return i >= 0 ? String(p).slice(i + 1) : String(p);
+        }
+
+        function addOption(value, label, disabled) {
+          var opt = document.createElement("option");
+          opt.value = value;
+          opt.textContent = label;
+          if (disabled) opt.disabled = true;
+          select.appendChild(opt);
+          return opt;
+        }
+
+        function build(models, current) {
+          select.innerHTML = "";
+
+          if (!models.length) {
+            addOption("", "No models downloaded yet", true);
+            help.textContent =
+              "Use Plugins \u2192 Live CC Generator \u2192 Download Speech Model to fetch one.";
+            select.disabled = true;
+            return;
+          }
+
+          var matched = false;
+          for (var i = 0; i < models.length; i++) {
+            addOption(models[i].path, models[i].label);
+            if (models[i].path === current) matched = true;
+          }
+
+          // A model chosen via "Choose Model File..." lives outside the plugin's
+          // data folder, so it will not be in the scanned list.
+          if (current && !matched) {
+            addOption(current, basename(current) + " (custom)");
+          }
+
+          select.value = current || models[0].path;
+          select.disabled = false;
+        }
+
+        // IINA fills the bound inputs shortly after load; poll briefly for it.
+        var tries = 0;
+        function whenBound() {
+          if (!modelsSrc.value && tries++ < 60) {
+            setTimeout(whenBound, 50);
+            return;
+          }
+          var models = [];
+          try {
+            // The plugin percent-encodes this; see refreshInstalledModels().
+            var raw = decodeURIComponent(modelsSrc.value || "");
+            models = JSON.parse(raw || "[]") || [];
+          } catch (e) {
+            models = [];
+          }
+          build(models, pathSrc.value || "");
+        }
+
+        select.addEventListener("change", function () {
+          if (!select.value) return;
+          pathSrc.value = select.value;
+          if (window.iina && window.iina.preferences) {
+            window.iina.preferences.set("model_path", select.value);
+          }
+          // Also nudge IINA's own binding, so it persists the value the same way
+          // it would for a user-typed edit.
+          pathSrc.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", whenBound);
+        } else {
+          whenBound();
+        }
+      })();
+    </script>
+
+  </body>
+</html>

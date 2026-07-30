@@ -1,0 +1,15 @@
+{
+  "name": "iina-plugin-live-cc",
+  "version": "0.1.0",
+  "description": "IINA plugin that generates live closed captions from the playing file's audio using a local whisper.cpp model.",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "link": "/Applications/IINA.app/Contents/MacOS/iina-plugin link .",
+    "unlink": "/Applications/IINA.app/Contents/MacOS/iina-plugin unlink .",
+    "pack": "/Applications/IINA.app/Contents/MacOS/iina-plugin pack ."
+  },
+  "devDependencies": {
+    "iina-plugin-definition": "^0.99.4"
+  }
+}

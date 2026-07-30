@@ -1,0 +1,43 @@
+{
+  "name": "Live CC Generator",
+  "identifier": "com.jensnagel.live-cc",
+  "version": "0.1.0",
+  "description": "Generates live closed captions from the playing file's own audio track using a local whisper.cpp model, transcribing ahead of the playhead.",
+  "author": {
+    "name": "Jens Nagel"
+  },
+  "ghRepo": "teltschik-star/iina-plugin-live-cc",
+  "ghVersion": 1,
+  "entry": "src/index.js",
+  "permissions": [
+    "show-osd",
+    "show-alert",
+    "video-overlay",
+    "file-system",
+    "network-request"
+  ],
+  "allowedDomains": [
+    "huggingface.co",
+    "*.huggingface.co",
+    "*.hf.co"
+  ],
+  "preferencesPage": "preferences.html",
+  "preferenceDefaults": {
+    "whisper_path": "",
+    "model_path": "@data/models/ggml-base.en.bin",
+    "installed_models": "[]",
+    "language": "auto",
+    "translate": false,
+    "vad": false,
+    "vad_threshold": 0.5,
+    "chunk_seconds": 30,
+    "chunk_tail_seconds": 3,
+    "lookahead_chunks": 2,
+    "threads": 0,
+    "max_line_length": 52,
+    "font_size": 28,
+    "position": "bottom",
+    "auto_start": false,
+    "show_status": true
+  }
+}
