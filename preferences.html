@@ -117,11 +117,14 @@
       <p class="small secondary pref-help">
         Removes silence and music before transcription, which is where invented
         text comes from. Needs the voice activity model &mdash; fetch it from
-        Plugins &rarr; Live CC Generator. <strong>Trade-off:</strong> it can also
-        discard quiet speech, and the threshold does not behave predictably &mdash;
-        on one test passage 0.5 and 0.2 returned nothing while 0.3 transcribed
-        correctly. Leave off unless hallucinations bother you, and re-check the
-        result after changing it.
+        Plugins &rarr; Live CC Generator, and whisper.cpp 1.9.2 or newer (earlier
+        versions report VAD timestamps against the wrong timeline).
+        <strong>Trade-off:</strong> it suppresses hallucinations on silence
+        reliably, but whether it keeps quiet speech is erratic and not a smooth
+        function of the threshold &mdash; measured on whisper.cpp 1.9.5, one
+        passage transcribed at 0.25&ndash;0.40 and 0.05, and returned nothing at
+        0.15&ndash;0.20 and 0.45&ndash;0.50. Treat the value as something to try
+        rather than tune, and re-check quiet scenes after changing it.
       </p>
     </div>
 

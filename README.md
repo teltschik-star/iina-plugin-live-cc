@@ -35,6 +35,9 @@ otherwise exported SubRip ends up with overlapping cues.
 brew install ffmpeg whisper-cpp
 ```
 
+whisper.cpp **1.9.2 or newer** is required if you intend to use voice activity
+detection; any version works otherwise.
+
 Then download a model from **Plugins → Live CC Generator → Download Speech
 Model**, or point the preferences at a `.bin` you already have.
 
@@ -231,12 +234,33 @@ is reduced. The threshold is deliberately high: "Mira, mira, mira este para qué
 es." is real speech and must survive, so three repeats are always left alone.
 
 **Voice activity detection is available but off by default.** It drops non-speech
-audio before decoding and reliably eliminates hallucinations on true silence. It
-is not enabled by default because it also discards quiet speech, and its threshold
-is not monotonic — on one test passage thresholds 0.5 and 0.2 returned nothing at
-all while 0.3 transcribed correctly. Enable it in preferences if hallucinations
-bother you more than the risk of losing quiet lines, and download the model from
-*Plugins → Live CC Generator → Download Voice Activity Model*.
+audio before decoding. Measured against whisper.cpp 1.9.5 on a quiet film passage
+and on pure silence:
+
+| Threshold | Quiet dialogue | Pure silence |
+| --- | --- | --- |
+| 0.05 | 7 cues | empty |
+| 0.10 | 2 cues | empty |
+| 0.15–0.20 | **nothing** | empty |
+| 0.25–0.40 | 3–5 cues | empty |
+| 0.45–0.50 | **nothing** | empty |
+| 0.60 | 2 cues | empty |
+| 0.70 | **nothing** | empty |
+
+Hallucination suppression is reliable at every threshold. Speech *retention* is
+not, and it is not a smooth function of the threshold — there is no setting that
+can be recommended as safe, which is why this stays opt-in. The default is 0.3,
+the best performer above; whisper.cpp's own default of 0.5 produced nothing at all
+on that passage.
+
+One point in its favour: VAD **improves timestamp accuracy** when a chunk begins
+with silence. On a probe of 10 s silence followed by speech, the non-VAD run
+placed the first cue at 00:00.000 while VAD correctly placed it at ~00:10.4.
+
+Requires whisper.cpp **1.9.2 or newer** — earlier versions map VAD timestamps
+against the compressed timeline rather than the original audio, which would
+misalign every cue. Download the model from *Plugins → Live CC Generator →
+Download Voice Activity Model*.
 
 None of this eliminates the problem. A larger model hallucinates less; so does
 avoiding long non-speech stretches.

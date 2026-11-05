@@ -29,7 +29,7 @@
     "language": "auto",
     "translate": false,
     "vad": false,
-    "vad_threshold": 0.5,
+    "vad_threshold": 0.3,
     "chunk_seconds": 30,
     "chunk_tail_seconds": 3,
     "lookahead_chunks": 2,

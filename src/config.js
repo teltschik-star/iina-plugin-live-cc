@@ -6,7 +6,7 @@ const DEFAULTS = {
   language: "auto",
   translate: false,
   vad: false,
-  vadThreshold: 0.5,
+  vadThreshold: 0.3,
   chunkSeconds: 30,
   chunkTailSeconds: 3,
   lookaheadChunks: 2,
