@@ -108,6 +108,21 @@ There is no build step — the plugin is plain CommonJS loaded by IINA's own
 `require()`. `jsconfig.json` wires up `iina-plugin-definition` so editors still
 give full autocomplete and type checking on the `iina` API.
 
+### Tests
+
+```bash
+npm test
+```
+
+No dependencies and no build: the suite runs on plain `node`. It covers the
+modules that carry logic rather than I/O — the cue store, SubRip rendering,
+language formatting, model capabilities, hallucination cleanup, preference
+coercion, and the preferences-page dropdown (executed against a DOM stub, since
+that code works around two IINA bugs and is easy to break silently).
+
+Anything that shells out to ffmpeg or whisper is deliberately not covered; those
+paths were verified by hand against real media.
+
 ## Using it
 
 **Plugins → Live CC Generator:**
